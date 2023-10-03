@@ -17,6 +17,11 @@ const bookSchema = new Schema({
   averageRating: { type: Number, required: true },
 });
 
+// méthode statique "findAll"
+bookSchema.statics.findAll = function () {
+  return this.find({});
+};
+
 const Book = mongoose.model("Book", bookSchema);
 
 module.exports = { Book };
