@@ -22,6 +22,11 @@ bookSchema.statics.findAll = function () {
   return this.find({});
 };
 
+// méthode statique "findToprated"
+bookSchema.statics.findTopRated = function () {
+  return this.find({}).sort({ averageRating: -1 }).limit(10);
+};
+
 const Book = mongoose.model("Book", bookSchema);
 
 module.exports = { Book };

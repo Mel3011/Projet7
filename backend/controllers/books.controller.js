@@ -14,6 +14,11 @@ exports.findAll = async (req, res) => {
 // récupérer un livre par son ID
 exports.findOneById = async (req, res) => {
   try {
+    if (req.params.id === "bestrating") {
+      // logique pour récupérer les livres les mieux notés
+      const topRatedBooks = await Book.findTopRated();
+      return res.status(200).json(topRatedBooks);
+    }
     const book = await Book.findById(req.params.id); // modèle pour rechercher le livre par son ID
     if (!book) {
       return res.status(404).json({ message: "Livre non trouvé" });
@@ -28,6 +33,7 @@ exports.findOneById = async (req, res) => {
 // ajouter un livre
 exports.addBook = (req, res, next) => {
   const bookObject = JSON.parse(req.body.book);
+  console.log(bookObject);
   delete bookObject._id;
   delete bookObject._userId;
   const book = new Book({
@@ -93,5 +99,34 @@ exports.findTopRated = async (req, res) => {
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Erreur interne du serveur" });
+  }
+};
+
+//noter un livre
+exports.rateBook = async (req, res, next) => {
+  try {
+    const userId = req.auth.userId;
+    const bookId = req.params.id;
+    const { rating } = req.body;
+
+    const book = await Book.findById(bookId);
+    if (!book) {
+      return res.status(404).json({ message: "livre non trouvé" });
+    }
+    const existRating = await Book.findOne({
+      bookId,
+      "ratings.userId": userId,
+    });
+    if (existRating) {
+      return res.status(401).json({ message: "vous avez déjà noté ce livre" });
+    } else {
+      book.ratings.push({ userId, grade: rating });
+
+      await book.save();
+    }
+    return res.status(200).json({ message: "note ajoutée" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "erreur interne" });
   }
 };
