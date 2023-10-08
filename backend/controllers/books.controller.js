@@ -75,7 +75,7 @@ exports.updateBook = (req, res, next) => {
           { _id: req.params.id },
           { ...bookObject, _id: req.params.id }
         )
-          .then(() => res.status(200).json({ message: "Objet modifié!" }))
+          .then(() => res.status(200).json({ message: "Livre modifié!" }))
           .catch((error) => res.status(401).json({ error }));
       }
     })
@@ -143,6 +143,7 @@ exports.rateBook = async (req, res, next) => {
     if (!book) {
       return res.status(404).json({ message: "livre non trouvé" });
     }
+
     const existRating = await Book.findOne({
       bookId,
       "ratings.userId": userId,
@@ -150,7 +151,15 @@ exports.rateBook = async (req, res, next) => {
     if (existRating) {
       return res.status(401).json({ message: "vous avez déjà noté ce livre" });
     } else {
+      //ajout de la nouvelle note à la liste des notes du livre
       book.ratings.push({ userId, grade: rating });
+
+      // Calculez la note moyenne à partir des notes existantes
+      const totalRatings = book.ratings.reduce(
+        (sum, ratingObj) => sum + ratingObj.grade,
+        0
+      );
+      book.averageRating = totalRatings / book.ratings.length;
 
       await book.save();
     }
