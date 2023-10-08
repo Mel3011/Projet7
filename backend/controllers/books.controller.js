@@ -58,7 +58,7 @@ exports.addBook = (req, res, next) => {
 exports.updateBook = (req, res, next) => {
   const bookObject = req.file
     ? {
-        ...JSON.parse(req.body.thing),
+        ...JSON.parse(req.body.book),
         imageUrl: `${req.protocol}://${req.get("host")}/images/${
           req.file.filename
         }`,
@@ -85,10 +85,40 @@ exports.updateBook = (req, res, next) => {
 };
 
 //Supprimer un livre
-exports.deleteBook = async (req, res) => {
-  Book.deleteOne({ _id: req.params.id })
-    .then(() => res.status(200).json({ message: "Objet supprimé !" }))
-    .catch((error) => res.status(400).json({ error }));
+const fs = require("fs");
+
+exports.deleteBook = async (req, res, next) => {
+  try {
+    const book = await Book.findOne({ _id: req.params.id });
+    if (!book) {
+      return res.status(404).json({ message: "Livre non trouvé" });
+    }
+    if (book.userId != req.auth.userId) {
+      return res.status(401).json({ message: "Not authorized" });
+    }
+    const filename = book.imageUrl.split("/images/")[1];
+
+    fs.unlink(`images/${filename}`, (err) => {
+      if (err) {
+        return res
+          .status(500)
+          .json({ error: "Erreur lors de la suppression de l'image" });
+      }
+
+      // Suppression image ok, suppression du livre
+      Book.deleteOne({ _id: req.params.id })
+        .then(() => {
+          res.status(200).json({ message: "Objet supprimé !" });
+        })
+        .catch((error) => {
+          res
+            .status(500)
+            .json({ error: "Erreur lors de la suppression du livre" });
+        });
+    });
+  } catch (error) {
+    res.status(500).json({ error: "Erreur interne du serveur" });
+  }
 };
 
 // afficher les mieux notés
