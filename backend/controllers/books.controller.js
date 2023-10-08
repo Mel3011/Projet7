@@ -1,6 +1,6 @@
 const { Book } = require("../models/books.model");
 
-// récupérer tous les livres
+// Récupérer tous les livres
 exports.findAll = async (req, res) => {
   try {
     const books = await Book.findAll(); // modèle pour récupérer tous les livres
@@ -11,7 +11,7 @@ exports.findAll = async (req, res) => {
   }
 };
 
-// récupérer un livre par son ID
+// Récupérer un livre par son ID
 exports.findOneById = async (req, res) => {
   try {
     if (req.params.id === "bestrating") {
@@ -30,7 +30,7 @@ exports.findOneById = async (req, res) => {
   }
 };
 
-// ajouter un livre
+// Ajouter un livre
 exports.addBook = (req, res, next) => {
   const bookObject = JSON.parse(req.body.book);
   console.log(bookObject);
@@ -121,7 +121,7 @@ exports.deleteBook = async (req, res, next) => {
   }
 };
 
-// afficher les mieux notés
+// Afficher les mieux notés
 exports.findTopRated = async (req, res) => {
   try {
     const topRatedBooks = await Book.findTopRated(); // modèle pour récupérer tous les livres
@@ -132,7 +132,7 @@ exports.findTopRated = async (req, res) => {
   }
 };
 
-//noter un livre
+// Noter un livre
 exports.rateBook = async (req, res, next) => {
   try {
     const userId = req.auth.userId;
@@ -141,7 +141,7 @@ exports.rateBook = async (req, res, next) => {
 
     const book = await Book.findById(bookId);
     if (!book) {
-      return res.status(404).json({ message: "livre non trouvé" });
+      return res.status(404).json({ message: "Livre non trouvé" });
     }
 
     const existRating = await Book.findOne({
@@ -149,23 +149,24 @@ exports.rateBook = async (req, res, next) => {
       "ratings.userId": userId,
     });
     if (existRating) {
-      return res.status(401).json({ message: "vous avez déjà noté ce livre" });
+      return res.status(401).json({ message: "Vous avez déjà noté ce livre" });
     } else {
-      //ajout de la nouvelle note à la liste des notes du livre
+      // Ajouter la nouvelle note à la liste des notes du livre
       book.ratings.push({ userId, grade: rating });
 
-      // Calculez la note moyenne à partir des notes existantes
+      // Calcul de la note moyenne à partir des notes existantes
       const totalRatings = book.ratings.reduce(
         (sum, ratingObj) => sum + ratingObj.grade,
         0
       );
-      book.averageRating = totalRatings / book.ratings.length;
+      const averageRating = totalRatings / book.ratings.length;
+      book.averageRating = Math.round(averageRating * 10) / 10;
 
       await book.save();
     }
-    return res.status(200).json({ message: "note ajoutée" });
+    return res.status(200).json({ message: "Note ajoutée" });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "erreur interne" });
+    res.status(500).json({ message: "Erreur interne" });
   }
 };
