@@ -138,14 +138,14 @@ exports.rateBook = async (req, res, next) => {
     const userId = req.auth.userId;
     const bookId = req.params.id;
     const { rating } = req.body;
-
     const book = await Book.findById(bookId);
+
     if (!book) {
       return res.status(404).json({ message: "Livre non trouvé" });
     }
 
     const existRating = await Book.findOne({
-      bookId,
+      id: bookId,
       "ratings.userId": userId,
     });
     if (existRating) {
@@ -164,7 +164,7 @@ exports.rateBook = async (req, res, next) => {
 
       await book.save();
     }
-    return res.status(200).json({ message: "Note ajoutée" });
+    return res.status(200).json(book);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Erreur interne" });
