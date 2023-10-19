@@ -33,25 +33,30 @@ exports.findOneById = async (req, res) => {
 // Ajouter un livre
 exports.addBook = (req, res, next) => {
   const bookObject = JSON.parse(req.body.book);
-  console.log(bookObject);
   delete bookObject._id;
   delete bookObject._userId;
-  const book = new Book({
-    ...bookObject,
-    userId: req.auth.userId,
-    imageUrl: `${req.protocol}://${req.get("host")}/images/${
-      req.file.filename
-    }`,
-  });
 
-  book
-    .save()
-    .then(() => {
-      res.status(201).json({ message: "Livre enregistré !" });
-    })
-    .catch((error) => {
-      res.status(400).json({ error });
+  // Vérifiez si une image a été téléchargée
+  if (!req.file) {
+    return res
+      .status(400)
+      .json({ error: "Veuillez ajouter une image pour le livre." });
+  } else {
+    const book = new Book({
+      ...bookObject,
+      userId: req.auth.userId,
+      imageUrl: `${req.protocol}://${req.get("host")}/images/${req.file.path}`,
     });
+
+    book
+      .save()
+      .then(() => {
+        res.status(201).json({ message: "Livre enregistré !" });
+      })
+      .catch((error) => {
+        res.status(400).json({ error });
+      });
+  }
 };
 
 // Modifier un livre
@@ -60,7 +65,7 @@ exports.updateBook = (req, res, next) => {
     ? {
         ...JSON.parse(req.body.book),
         imageUrl: `${req.protocol}://${req.get("host")}/images/${
-          req.file.filename
+          req.file.path
         }`,
       }
     : { ...req.body };
