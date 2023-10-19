@@ -2,8 +2,6 @@
 
 Projet n°7 de la formation Développeur Web OpenClassrooms
 
-![Banner](/imagesreadme/16654934257102_DW-P7-Back-end_company-banner.png)
-
 Pour connecter la base de donnée :
 
 - supprimer le .exemple du fichier .env.exemple
@@ -28,12 +26,6 @@ Kévin me contacte pour me proposer de travailler avec lui en mutualisant nos co
 
 Développer le back-end du site
 
-## Spécifications de l'API
-
-![spec1](/imagesreadme/spec1.png)
-
-![spec2](/imagesreadme/spec2.png)
-
 ## API Errors
 
 Les erreurs éventuelles doivent être renvoyées telles qu'elles se sont produites, sans modification ni ajout. Si nécessaire, utilisez une nouvelle Error().
@@ -57,11 +49,11 @@ Book {
  year: Number - année de publication du livre  
  genre: String - genre du livre  
  ratings : [
- {
- userId : String - identifiant MongoDB unique de l'utilisateur qui a noté le livre
- grade : Number - note donnée à un livre
- }
- ] - notes données à un livre  
+{
+userId : String - identifiant MongoDB unique de l'utilisateur qui a noté le livre
+grade : Number - note donnée à un livre
+}
+] - notes données à un livre  
  averageRating : Number - note moyenne du livre  
 }
 
